@@ -1,0 +1,9 @@
+{
+  "questions": [
+    {"question": "Do you see dense forest?"},
+    {"question": "Are there tribal villages nearby?"},
+    {"question": "Do you see wild animals?"},
+    {"question": "Is the area heavily forested and isolated?"},
+    {"question": "Is network connectivity weak?"}
+  ]
+}

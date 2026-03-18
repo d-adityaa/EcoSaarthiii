@@ -1,0 +1,9 @@
+{
+  "questions": [
+    {"question": "Is the land flat?"},
+    {"question": "Do you see farms or paddy fields?"},
+    {"question": "Are there villages nearby?"},
+    {"question": "Do you see cattle like cows or buffalo?"},
+    {"question": "Is the area less forested?"}
+  ]
+}

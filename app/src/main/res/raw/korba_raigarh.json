@@ -1,0 +1,9 @@
+{
+  "questions": [
+    {"question": "Do you see industrial areas or mines?"},
+    {"question": "Is coal mining visible nearby?"},
+    {"question": "Are there power plants nearby?"},
+    {"question": "Is the environment slightly polluted?"},
+    {"question": "Is it semi-urban area?"}
+  ]
+}

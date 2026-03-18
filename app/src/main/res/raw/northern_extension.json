@@ -1,0 +1,9 @@
+{
+  "questions": [
+    {"question": "Is the terrain mountainous?"},
+    {"question": "Do you see dense trees and hills?"},
+    {"question": "Is the temperature cooler?"},
+    {"question": "Are there waterfalls or streams nearby?"},
+    {"question": "Is the area remote and forested?"}
+  ]
+}

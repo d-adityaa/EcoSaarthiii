@@ -1,0 +1,9 @@
+{
+  "questions": [
+    {"question": "Is the terrain hilly?"},
+    {"question": "Do you see bamboo or hill forest?"},
+    {"question": "Are there tribal communities nearby?"},
+    {"question": "Is the area less urbanized?"},
+    {"question": "Is the temperature cooler than plains?"}
+  ]
+}

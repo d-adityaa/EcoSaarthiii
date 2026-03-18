@@ -1,10 +1,13 @@
 package com.example.ecosaarthi
 
+import android.app.Activity
+import android.content.Intent
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -56,7 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -161,20 +164,14 @@ fun EcoSaarthiApp() {
                         Toast.makeText(context, "Status refreshed", Toast.LENGTH_SHORT).show()
                     },
                     onOnlineClick = {
-                        if (hasGoodInternet(context)) {
-                            selectedMode = "Online"
-                            Toast.makeText(context, "Online Mode opened", Toast.LENGTH_SHORT).show()
-                        } else {
-                            Toast.makeText(
-                                context,
-                                "Good internet required for Online Mode",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
+                        selectedMode = "Online"
+                        Toast.makeText(context, "Online Mode Coming Soon 🚀", Toast.LENGTH_SHORT).show()
                     },
                     onOfflineClick = {
                         selectedMode = "Offline"
-                        Toast.makeText(context, "Offline Mode opened", Toast.LENGTH_SHORT).show()
+
+                        val intent = Intent(context, OfflineActivity::class.java)
+                        context.startActivity(intent)
                     },
                     onQuickAction = { action ->
                         Toast.makeText(context, action, Toast.LENGTH_SHORT).show()
@@ -276,6 +273,7 @@ fun HomeScreen(
     onOfflineClick: () -> Unit,
     onQuickAction: (String) -> Unit
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -341,7 +339,10 @@ fun HomeScreen(
                 title = "SOS Emergency",
                 subtitle = "Call 112 · Always works",
                 iconBg = Color(0xFFFFE6E4),
-                onClick = { onQuickAction("SOS tapped") }
+                onClick = {
+                    val intent = Intent(context, SOSActivity::class.java)
+                    context.startActivity(intent)
+                }
             )
             QuickActionCard(
                 modifier = Modifier.weight(1f),
@@ -349,7 +350,11 @@ fun HomeScreen(
                 title = "Detect Region",
                 subtitle = "Offline location quiz",
                 iconBg = Color(0xFFE3F4E8),
-                onClick = { onQuickAction("Detect Region tapped") }
+                onClick = {
+                    val activity = context as Activity
+                    val intent = Intent(activity, CompassActivity::class.java)
+                    activity.startActivity(intent)
+                }
             )
         }
 
@@ -373,7 +378,11 @@ fun HomeScreen(
                 title = "Guide Book",
                 subtitle = "Offline resource kit",
                 iconBg = Color(0xFFFFF0C9),
-                onClick = { onQuickAction("Guide Book tapped") }
+                onClick = {
+                    val activity = context as Activity
+                    val intent = Intent(activity, SafetyActivity::class.java)
+                    activity.startActivity(intent)
+                }
             )
         }
 

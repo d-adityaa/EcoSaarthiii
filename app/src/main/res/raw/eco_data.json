@@ -1,0 +1,36 @@
+{
+  "regions": [
+    {
+      "name": "Bastar",
+      "questions": [
+        "Do you see dense forest?",
+        "Are there tribal villages nearby?",
+        "Do you see wild animals?",
+        "Is terrain rocky and forested?"
+      ],
+      "output": "📍 Location: Bastar (Approximation)\n\n🌿 Speciality: Dense forest\n🏛 History: Tribal culture\n🐅 Wildlife: Tiger, bison\n🏥 Medical: Limited\n⚠ Do: Stay in group\n❌ Don't: Avoid deep forest"
+    },
+
+    {
+      "name": "Central Plains",
+      "questions": [
+        "Is land flat?",
+        "Do you see farms?",
+        "Are there villages nearby?",
+        "Do you see cattle?"
+      ],
+      "output": "📍 Location: Raipur–Durg (Approximation)\n\n🌿 Speciality: Agriculture\n🏛 History: Cultural center\n🐄 Wildlife: Cattle\n🏥 Medical: Good hospitals\n⚠ Do: Stay hydrated\n❌ Don't: Avoid unknown routes"
+    },
+
+    {
+      "name": "Northern Hills",
+      "questions": [
+        "Is terrain hilly?",
+        "Do you see dense trees?",
+        "Are there streams?",
+        "Do you see tribal areas?"
+      ],
+      "output": "📍 Location: Northern Hills CG (Approximation)\n\n🌿 Speciality: Hills + forest\n🏛 History: Tribal region\n🐅 Wildlife: Deer, bear\n🏥 Medical: Limited\n⚠ Do: Stay alert\n❌ Don't: Avoid night travel"
+    }
+  ]
+}
