@@ -181,10 +181,8 @@ fun EcoSaarthiApp() {
                     }
                 )
 
-                BottomTab.TOOLS -> PlaceholderScreen(
-                    paddingValues = innerPadding,
-                    title = "Tools",
-                    subtitle = "AI guide, eco checks, quick utilities"
+                BottomTab.TOOLS -> ToolsScreen(
+                    paddingValues = innerPadding
                 )
 
                 BottomTab.VISIT -> PlaceholderScreen(
@@ -772,4 +770,144 @@ fun hasGoodInternet(context: Context): Boolean {
     val validated = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 
     return hasInternet && validated
+}fun calculateSafetyScore(): Int {
+    val weatherRisk = 10
+    val wildlifeRisk = 30
+    val networkRisk = 20
+    val helpDistanceRisk = 18
+
+    val totalRisk = weatherRisk + wildlifeRisk + networkRisk + helpDistanceRisk
+    return 100 - totalRisk
+}
+
+@Composable
+fun ToolsScreen(
+    paddingValues: PaddingValues
+) {
+    var safetyScore by remember { mutableStateOf(calculateSafetyScore()) }
+    var weatherRisk by remember { mutableStateOf("Low") }
+    var wildlifeRisk by remember { mutableStateOf("Medium") }
+    var networkRisk by remember { mutableStateOf("Low") }
+    var nearestHelp by remember { mutableStateOf("8 km") }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Forest Safety Score",
+            fontSize = 24.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = Color(0xFF103B2C)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "Smart risk summary for the current eco zone",
+            fontSize = 14.sp,
+            color = Color(0xFF64786E)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "$safetyScore / 100",
+                    fontSize = 34.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = when {
+                        safetyScore >= 80 -> Color(0xFF1B8A4A)
+                        safetyScore >= 50 -> Color(0xFFE6A700)
+                        else -> Color(0xFFD64545)
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = when {
+                        safetyScore >= 80 -> "Safe Zone"
+                        safetyScore >= 50 -> "Moderate Risk"
+                        else -> "High Risk"
+                    },
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF476554)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        SafetyReasonCard("🌧 Weather risk", weatherRisk)
+        Spacer(modifier = Modifier.height(10.dp))
+        SafetyReasonCard("🐘 Wildlife activity", wildlifeRisk)
+        Spacer(modifier = Modifier.height(10.dp))
+        SafetyReasonCard("📶 Network availability", networkRisk)
+        Spacer(modifier = Modifier.height(10.dp))
+        SafetyReasonCard("🚑 Nearest help distance", nearestHelp)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(18.dp))
+                .background(Color(0xFF1E5B45))
+                .clickable {
+                    safetyScore = calculateSafetyScore()
+                    weatherRisk = "Low"
+                    wildlifeRisk = "Medium"
+                    networkRisk = "Low"
+                    nearestHelp = "8 km"
+                }
+                .padding(horizontal = 18.dp, vertical = 10.dp)
+        ) {
+            Text(
+                text = "Refresh Score",
+                color = Color.White,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+fun SafetyReasonCard(label: String, value: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = label,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF173D2E)
+            )
+
+            Text(
+                text = value,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF5F6F65)
+            )
+        }
+    }
 }
