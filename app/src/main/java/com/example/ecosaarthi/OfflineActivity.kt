@@ -1,248 +1,129 @@
 package com.example.ecosaarthi
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import org.json.JSONArray
 import org.json.JSONObject
 
 class OfflineActivity : AppCompatActivity() {
 
-    lateinit var questionText: TextView
-    lateinit var yesBtn: Button
-    lateinit var noBtn: Button
-    lateinit var resultText: TextView
+    private lateinit var stateSpinner: Spinner
+    private lateinit var districtSpinner: Spinner
+    private lateinit var placeSpinner: Spinner
+    private lateinit var showBtn: Button
 
-    var currentQuestionIndex = 0
-
-    val regionFiles = listOf(
-        "central",
-        "bastar",
-        "dhamtari",
-        "gariaband",
-        "kawardha",
-        "korba_raigarh",
-        "northernhills_cg",
-        "northern_extension"
-    )
-
-    val questionsMap = mutableMapOf<String, MutableList<String>>()
-    val scores = mutableMapOf<String, Int>()
-
-    val allQuestions = mutableListOf<String>()
+    private var jsonData: JSONArray? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_offline)
 
-        questionText = findViewById(R.id.questionText)
-        yesBtn = findViewById(R.id.option1)
-        noBtn = findViewById(R.id.option2)
-        resultText = findViewById(R.id.resultText)
+        stateSpinner = findViewById(R.id.stateSpinner)
+        districtSpinner = findViewById(R.id.districtSpinner)
+        placeSpinner = findViewById(R.id.placeSpinner)
+        showBtn = findViewById(R.id.showBtn)
 
-        loadAllJSON()
-        showQuestion()
+        loadJSON()
+        setupStateSpinner()
 
-        yesBtn.setOnClickListener {
-            updateScores(true)
-            checkResultOrNext()
-        }
+        showBtn.setOnClickListener {
+            val state = stateSpinner.selectedItem.toString()
+            val district = districtSpinner.selectedItem.toString()
+            val place = placeSpinner.selectedItem.toString()
 
-        noBtn.setOnClickListener {
-            checkResultOrNext()
-        }
-    }
+            val result = findData(state, district, place)
 
-    fun loadAllJSON() {
-        for (region in regionFiles) {
-
-            val resId = resources.getIdentifier(region, "raw", packageName)
-            if (resId == 0) continue
-
-            val jsonString = resources.openRawResource(resId)
-                .bufferedReader().use { it.readText() }
-
-            val json = JSONObject(jsonString)
-            val arr = json.getJSONArray("questions")
-
-            val list = mutableListOf<String>()
-
-            for (i in 0 until arr.length()) {
-                val q = arr.getJSONObject(i).getString("question")
-                list.add(q)
-
-                if (!allQuestions.contains(q)) {
-                    allQuestions.add(q)
-                }
-            }
-
-            questionsMap[region] = list
-            scores[region] = 0
-        }
-
-        allQuestions.shuffle() // 🔥 random questions
-    }
-
-    fun showQuestion() {
-        if (currentQuestionIndex < allQuestions.size) {
-            questionText.text = allQuestions[currentQuestionIndex]
-        } else {
-            showFinalResult()
-        }
-    }
-
-    fun updateScores(answerYes: Boolean) {
-        if (!answerYes) return
-
-        val currentQ = allQuestions[currentQuestionIndex]
-
-        for ((region, questions) in questionsMap) {
-            if (questions.contains(currentQ)) {
-                scores[region] = scores[region]!! + 1
+            if (result != null) {
+                val intent = Intent(this, ResultActivity::class.java)
+                intent.putExtra("data", result.toString())
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, "No Data Found ❌", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    fun checkResultOrNext() {
+    // 🔥 Load JSON
+    private fun loadJSON() {
+        val inputStream = resources.openRawResource(R.raw.eco_data)
+        val jsonString = inputStream.bufferedReader().use { it.readText() }
+        jsonData = JSONArray(jsonString)
+    }
 
-        val sorted = scores.entries.sortedByDescending { it.value }
+    // 🔥 Setup State Spinner
+    private fun setupStateSpinner() {
+        val states = mutableSetOf<String>()
 
-        if (sorted.size > 1) {
-            val top = sorted[0]
-            val second = sorted[1]
+        for (i in 0 until jsonData!!.length()) {
+            val obj = jsonData!!.getJSONObject(i)
+            states.add(obj.getString("state"))
+        }
 
-            // 🔥 SMART DECISION
-            if (top.value >= 3 && top.value - second.value >= 2) {
-                showFinalResult()
-                return
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, states.toList())
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        stateSpinner.adapter = adapter
+
+        stateSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
+                setupDistrictSpinner(stateSpinner.selectedItem.toString())
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
+    }
+
+    // 🔥 Setup District Spinner
+    private fun setupDistrictSpinner(state: String) {
+        val districts = mutableSetOf<String>()
+
+        for (i in 0 until jsonData!!.length()) {
+            val obj = jsonData!!.getJSONObject(i)
+            if (obj.getString("state") == state) {
+                districts.add(obj.getString("district"))
             }
         }
 
-        currentQuestionIndex++
-        showQuestion()
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, districts.toList())
+        districtSpinner.adapter = adapter
+
+        districtSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: android.view.View?, position: Int, id: Long) {
+                setupPlaceSpinner(state, districtSpinner.selectedItem.toString())
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {}
+        }
     }
 
-    fun showFinalResult() {
+    // 🔥 Setup Place Spinner
+    private fun setupPlaceSpinner(state: String, district: String) {
+        val places = mutableSetOf<String>()
 
-        val bestRegion = scores.maxByOrNull { it.value }?.key ?: "central"
-
-        val result = when (bestRegion) {
-
-            "bastar" -> """
-📍 Location: Bastar, Chhattisgarh (Approximation)
-
-🌿 Speciality:
-Dense sal forests, tribal culture
-
-🏛 History:
-Ancient tribal heritage (Gond, Maria)
-
-🐅 Wildlife:
-Tiger, bison, wild boar
-
-🏥 Medical:
-Limited access
-
-⚠ Do:
-• Travel in groups
-• Carry supplies
-
-❌ Don’t:
-• Avoid deep forest alone
-"""
-
-            "kawardha" -> """
-📍 Location: Maikal Hills, Kawardha (Approximation)
-
-🌿 Speciality:
-Hill forests, bamboo
-
-🏛 History:
-Baiga tribe region
-
-🐅 Wildlife:
-Deer, bison
-
-🏥 Medical:
-Basic facilities
-
-⚠ Do:
-• Respect tribal zones
-
-❌ Don’t:
-• Avoid disturbing nature
-"""
-
-            "gariaband" -> """
-📍 Location: Gariaband Region (Approximation)
-
-🌿 Speciality:
-Forest + agriculture mix
-
-🏛 History:
-Tribal-farming culture
-
-🐒 Wildlife:
-Monkeys, peafowl
-
-🏥 Medical:
-Moderate
-
-⚠ Do:
-• Stay alert near forests
-
-❌ Don’t:
-• Avoid isolated zones
-"""
-
-            "dhamtari" -> """
-📍 Location: Dhamtari–Kanker Belt (Approximation)
-
-🌿 Speciality:
-Transition zone
-
-🏛 History:
-Mixed tribal culture
-
-🐅 Wildlife:
-Deer, birds
-
-🏥 Medical:
-Moderate
-
-⚠ Do:
-• Follow local routes
-
-❌ Don’t:
-• Avoid night travel
-"""
-
-            else -> """
-📍 Location: Central Plains (Raipur, Durg) (Approximation)
-
-🌿 Speciality:
-Agriculture
-
-🏛 History:
-Cultural center
-
-🐄 Wildlife:
-Cattle
-
-🏥 Medical:
-Good hospitals
-
-⚠ Do:
-• Stay hydrated
-
-❌ Don’t:
-• Avoid unknown areas
-"""
+        for (i in 0 until jsonData!!.length()) {
+            val obj = jsonData!!.getJSONObject(i)
+            if (obj.getString("state") == state && obj.getString("district") == district) {
+                places.add(obj.getString("place"))
+            }
         }
 
-        questionText.text = "Analysis Complete ✅"
-        yesBtn.visibility = Button.GONE
-        noBtn.visibility = Button.GONE
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, places.toList())
+        placeSpinner.adapter = adapter
+    }
 
-        resultText.text = result
+    // 🔥 Find Selected Data
+    private fun findData(state: String, district: String, place: String): JSONObject? {
+        for (i in 0 until jsonData!!.length()) {
+            val obj = jsonData!!.getJSONObject(i)
+            if (
+                obj.getString("state") == state &&
+                obj.getString("district") == district &&
+                obj.getString("place") == place
+            ) {
+                return obj
+            }
+        }
+        return null
     }
 }
