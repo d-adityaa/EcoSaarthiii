@@ -165,7 +165,9 @@ fun EcoSaarthiApp() {
                     },
                     onOnlineClick = {
                         selectedMode = "Online"
-                        Toast.makeText(context, "Online Mode Coming Soon 🚀", Toast.LENGTH_SHORT).show()
+
+                        val intent = Intent(context, OnlineActivity::class.java)
+                        context.startActivity(intent)
                     },
                     onOfflineClick = {
                         selectedMode = "Offline"
